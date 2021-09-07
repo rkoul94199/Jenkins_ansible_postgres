@@ -1,0 +1,31 @@
+---
+- hosts: all
+  any_errors_fatal: True
+  become: yes
+  become_method: sudo
+  remote_user: ansible
+  gather_facts: yes
+
+  tasks:
+  - name: Install the repository RPM
+    yum:
+      name:
+        - postgresql12-server
+      state: present
+  - name: install prerequisites
+    yum:
+       name: python-psycopg2
+       state: latest
+  - name: -------INITB CLUSTER------------
+    command: /usr/pgsql-12/bin/postgresql-12-setup initdb
+  - service:
+        name: postgresql-12
+        state: started
+  - name: ==============Ping Postgresql=================
+    postgresql_ping:
+      db: postgres
+      login_unix_socket: "/var/run/postgresql"
+      login_user: postgres
+    become: yes
+    become_user: postgres
+
